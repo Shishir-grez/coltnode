@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -58,11 +60,24 @@ func main() {
 		
 		job, err := memoryStorage.GetJob(jobID)
 		if err != nil {
+			log.Printf("Error getting job %s: %v", jobID, err)
 			c.JSON(http.StatusNotFound, gin.H{"error": "Job not found"})
 			return
 		}
 		
 		c.JSON(http.StatusOK, job)
+	})
+	
+	// Add endpoint for listing all jobs
+	router.GET("/jobs", func(c *gin.Context) {
+		jobs, err := memoryStorage.GetAllJobs()
+		if err != nil {
+			log.Printf("Error getting all jobs: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get jobs"})
+			return
+		}
+		
+		c.JSON(http.StatusOK, jobs)
 	})
 	
 	router.POST("/workers", func(c *gin.Context) {
@@ -100,6 +115,15 @@ func main() {
 		
 		c.JSON(http.StatusOK, workers)
 	})
+	
+	// Print server info
+	fmt.Println("Job Scheduler Server started on :8080")
+	fmt.Println("Available endpoints:")
+	fmt.Println("  POST /jobs - Create a new job")
+	fmt.Println("  GET /jobs - List all jobs")
+	fmt.Println("  GET /jobs/:id - Get job details")
+	fmt.Println("  POST /workers - Register a new worker")
+	fmt.Println("  GET /workers - List all workers")
 	
 	// Start the server
 	router.Run(":8080")

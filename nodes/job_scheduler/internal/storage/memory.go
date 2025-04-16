@@ -105,3 +105,15 @@ func (s *MemoryStorage) GetAvailableWorkers() ([]*models.Worker, error) {
 	}
 	return available, nil
 }
+
+// GetAllJobs returns all jobs in the storage
+func (s *MemoryStorage) GetAllJobs() ([]*models.Job, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	
+	jobs := make([]*models.Job, 0, len(s.jobs))
+	for _, job := range s.jobs {
+		jobs = append(jobs, job)
+	}
+	return jobs, nil
+}
